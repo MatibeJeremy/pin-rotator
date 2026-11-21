@@ -7,13 +7,11 @@ import {
     CardContent,
     CardActions,
     Card,
-    Box, Stack, Alert, SnackbarCloseReason, IconButton, Snackbar,
+    Box, Stack, Alert, SnackbarCloseReason, Snackbar,
 } from "@mui/material";
-import CheckIcon from '@mui/icons-material/Check';
 import React, { useRef, useState } from "react";
 import { TypeAnimation } from "react-type-animation";
 import validatePin from "@/app/utils/validatePin";
-import {Close} from "@mui/icons-material";
 import {useRouter} from "next/navigation";
 
 
@@ -74,6 +72,9 @@ export default function ValidateCard() {
             showToast(error.message || error, "error");
         }).finally(() => {
             setLoading(false);
+            inputRefs.current.forEach((el) => {
+                el && (el.value = "");
+            });
         });
     };
 

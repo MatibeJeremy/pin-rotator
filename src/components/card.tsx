@@ -93,6 +93,13 @@ export default function DisplayCard() {
             })
             .finally(() => {
                 setLoading(false);
+                setOpen(false);
+                inputRefs.current.forEach((el) => {
+                    el && (el.value = "");
+                });
+                inputRefsConfirm.current.forEach((el) => {
+                    el && (el.value = "");
+                });
             });
     };
 
