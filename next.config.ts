@@ -7,7 +7,7 @@ const nextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
-  serverExternalPackages: ["sqlite3"],
+  serverExternalPackages: ["sqlite3","node-cron"],
 };
 
 export default nextConfig;
