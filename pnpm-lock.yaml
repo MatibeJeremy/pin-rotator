@@ -23,6 +23,12 @@ dependencies:
   next:
     specifier: 16.4.6
     version: 16.4.6(@babel/core@7.29.13)(@types/node@20.0.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1)(react@19.3.1)
+  node-cron:
+    specifier: ^4.6.0
+    version: 4.6.0
+  nodemailer:
+    specifier: ^10.6.1
+    version: 10.6.1
   react:
     specifier: 19.3.1
     version: 19.3.1
@@ -3261,6 +3267,11 @@ packages:
     engines: {node: ^18 || ^20 || >= 21}
     dev: false
 
+  /node-cron@4.6.0:
+    resolution: {integrity: sha512-Si/bzYiKRHOB8/a99T2+SDGN582ONDMSTlJr5oCkT6GtnqPjZ2s10eoQRYkW9ZHwjVxONL+W8Fb+qR0AHMQsdg==}
+    engines: {node: '>=20'}
+    dev: false
+
   /node-exports-info@1.6.2:
     resolution: {integrity: sha512-kXs9Go0cah0qHVV2v389IXQLdLCeE1xfFtjOAF+iobu0OIoG1pje8At2vMHyaPMiPMnG/LWP50twML21eMcAag==}
     engines: {node: '>= 0.4'}
@@ -3292,6 +3303,11 @@ packages:
   /node-releases@2.0.65:
     resolution: {integrity: sha512-PfvofsGQ+MiOQIPkX9fU8ELUWmy5zL74CdQaph/ismKszfFkfwXaw0cGiwbwym2hT9k5+mdyl8O5WQ1MD8EHmA==}
     engines: {node: '>=18'}
+
+  /nodemailer@10.6.1:
+    resolution: {integrity: sha512-d7kfFfS/tR4Aca+SBvRaQ+MXKNv7d2JiRe5TxaRcFT/kYMh4GGPnW9aKksTIEvyEbA7d/7HYWE4YPDEHxzJj/g==}
+    engines: {node: '>=20.0.0'}
+    dev: false
 
   /nopt@9.0.0:
     resolution: {integrity: sha512-Zhq3a+yFKrYwSBluL4H9XP3m3y5uvQkB/09CwDruCiRmR/UJYnn9W4R48ry0uGC70aeTPKLynBtscP9efFFcPw==}
