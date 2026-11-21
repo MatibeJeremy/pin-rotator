@@ -1,9 +1,8 @@
-import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const nextConfig = {
   experimental: {
     agentFeedback: true,
+    instrumentationHook: true
   },
   cacheComponents: true,
   partialPrefetching: true,
