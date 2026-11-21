@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: pin-rotator
+    runtime: node
+    buildCommand: pnpm install && pnpm run build
+    startCommand: pnpm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: nextjs-cache
+      mountPath: /opt/render/project/src/.next/cache
+      sizeGB: 10

@@ -15,7 +15,8 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-geist-sans);
-  background-color: var(--background);
+  background-color: var(--background);          /* shown while the image loads */
+  background-image: url("../assets/background.jpg");
 }
 
 .main {
@@ -26,7 +27,7 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  background-color: var(--foreground);
+  background-color: transparent;
   padding: 120px 60px;
 }
 
