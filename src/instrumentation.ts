@@ -12,7 +12,7 @@ export async function register() {
     const { rotatePin } = await import("./app/lib/rotatePin");
 
     cron.schedule(
-        "*/3 * * * *",
+        "* */12 * * *",
         async () => {
             console.log("[cron] firing");
             try {
@@ -25,5 +25,5 @@ export async function register() {
         { timezone: "Africa/Nairobi" }
     );
 
-    console.log("[cron] scheduled every 3 minutes");
+    console.log("[cron] scheduled every 12 hours");
 }

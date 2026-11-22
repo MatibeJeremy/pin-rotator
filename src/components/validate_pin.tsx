@@ -66,7 +66,10 @@ export default function ValidateCard() {
         setLoading(true);
         validatePin(pin).then(() => {
             showToast("Pin is Correct", "success");
-            setTimeout(() => router.push("/"), 3000);
+            setTimeout(() => {
+                setToast((t) => ({ ...t, open: false }));
+                router.push("/");
+            },3000);
             inputRefs.current.forEach((el) => {
                 el && (el.value = "");
             });
