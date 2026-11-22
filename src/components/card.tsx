@@ -7,14 +7,13 @@ import {
     CardContent,
     CardActions,
     Card,
-    Box, Stack, Snackbar, SnackbarCloseReason, IconButton,
+    Box, Stack, Snackbar, SnackbarCloseReason, Alert,
 } from "@mui/material";
 import { useRef, useState } from "react";
 import { TypeAnimation } from "react-type-animation";
 import { useRouter } from "next/navigation";
 import createPin from "@/app/utils/setPin";
 import React from "react";
-import {Close} from "@mui/icons-material";
 
 
 const PIN_LENGTH = 4;
@@ -25,16 +24,16 @@ export default function DisplayCard() {
     const [disabled, setDisabled] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
     const router = useRouter();
-    const [open, setOpen] = useState<boolean>(false);
+    const [toast, setToast] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({
+        open: false, message: "", severity: "success",
+    });
 
-    const handleClose = (
-        event: React.SyntheticEvent | Event,
-        reason?: SnackbarCloseReason,
-    ) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        setOpen(false);
+    const showToast = (message: string, severity: "success" | "error") =>
+        setToast({ open: true, message, severity });
+
+    const handleToastClose = (event: React.SyntheticEvent | Event, reason?: SnackbarCloseReason) => {
+        if (reason === "clickaway") return;
+        setToast((t) => ({ ...t, open: false }));      // keep the message so it doesn't flash empty
     };
 
     const readPin = (refs: { current: (HTMLInputElement | null)[] }) =>
@@ -85,15 +84,18 @@ export default function DisplayCard() {
         setLoading(true);
         createPin(pin)
             .then(() => {
-                setOpen(true);
-                setTimeout(() => router.push("/home/validate"), 3000);
+                setTimeout(() => {
+                    showToast("Pin set!", "success");
+                    router.push("/home/validate");
+                }, 3000);
             })
             .catch((error: unknown) => {
                 console.error("Error creating pin:", error);
+                showToast("Failed to create pin", "error");
             })
             .finally(() => {
                 setLoading(false);
-                setOpen(false);
+                setToast((t) => ({ ...t, open: false }));
                 inputRefs.current.forEach((el) => {
                     el && (el.value = "");
                 });
@@ -102,22 +104,6 @@ export default function DisplayCard() {
                 });
             });
     };
-
-    const action = (
-        <React.Fragment>
-            <Button color="error" size="small" onClick={handleClose}>
-                UNDO
-            </Button>
-            <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={handleClose}
-            >
-                <Close fontSize="small"/>
-            </IconButton>
-        </React.Fragment>
-    );
 
     return (
         <Stack sx={{
@@ -196,13 +182,11 @@ export default function DisplayCard() {
                     </Button>
                 </CardActions>
             </Card>
-            <Snackbar
-                open={open}
-                autoHideDuration={6000}
-                onClose={handleClose}
-                message="Pin created successfully"
-                action={action}
-            />
+            <Snackbar open={toast.open} autoHideDuration={6000} onClose={handleToastClose}>
+                <Alert onClose={handleToastClose} severity={toast.severity} variant="filled" sx={{ width: "100%" }}>
+                    {toast.message}
+                </Alert>
+            </Snackbar>
         </Stack>
     );
 }
