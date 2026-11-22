@@ -12,7 +12,6 @@ RUN corepack enable \
 
 WORKDIR /app
 
-# Install dependencies first so Docker can cache this layer
 COPY package.json pnpm-lock.yaml ./
 RUN npm_config_build_from_source=true pnpm install --frozen-lockfile
 
