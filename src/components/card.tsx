@@ -109,7 +109,7 @@ export default function DisplayCard() {
         <Stack sx={{
             backgroundColor: "background.default",
             minHeight: "100vh",
-            width: "50vw",
+            width: { xs: "100%", md: "50vw" },
             display: "flex",
             justifyContent: "center",
             alignItems: "right"
