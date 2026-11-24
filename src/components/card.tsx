@@ -14,6 +14,7 @@ import { TypeAnimation } from "react-type-animation";
 import { useRouter } from "next/navigation";
 import createPin from "@/app/utils/setPin";
 import React from "react";
+import { useEmail } from "@/app/providers/EmailContext";
 
 
 const PIN_LENGTH = 4;
@@ -27,6 +28,7 @@ export default function DisplayCard() {
     const [toast, setToast] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({
         open: false, message: "", severity: "success",
     });
+    const { email } = useEmail();
 
     const showToast = (message: string, severity: "success" | "error") =>
         setToast({ open: true, message, severity });
@@ -82,7 +84,7 @@ export default function DisplayCard() {
 
         const pin = readPin(inputRefs);
         setLoading(true);
-        createPin(pin)
+        createPin(pin, email)
             .then(() => {
                 setTimeout(() => {
                     showToast("Pin set!", "success");
