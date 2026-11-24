@@ -1,8 +1,8 @@
-async function validatePin(pinValue: string) {
+async function validatePin(pinValue: string, email: string) {
     const res = await fetch("/api/validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin_value: pinValue}),
+        body: JSON.stringify({ pin_value: pinValue, email: email}),
     });
 
     const data = await res.json().catch(() => ({}));

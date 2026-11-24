@@ -5,23 +5,24 @@ import { visuallyHidden } from "@mui/utils";
 import { TypeAnimation } from "react-type-animation";
 import {
   Box,
-  IconButton,
   Button,
   TextField,
   Tooltip,
   Typography,
   Stack,
-  formLabelClasses,
   CircularProgress,
+  Snackbar,
+  Alert,
+  SnackbarCloseReason,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
 import { useRouter } from "next/navigation";
 import checkEmail from "./utils/checkEmail";
 import { keyframes } from "@mui/system";
 import { Search } from "@mui/icons-material";
+import { useEmail } from "@/app/providers/EmailContext";
 
 const spin = keyframes`
   from { transform: rotate(0deg); }
@@ -37,13 +38,32 @@ export default function Home() {
   const [isRegistered, setIsRegistered] = useState<boolean>(false);
   const [emailValid, setEmailValid] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [emailExists, setEmailExits] = useState<boolean>(false);
+  const [emailExists, setEmailExists] = useState<boolean>(false);
   const handleEmailBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
     const email = e.target.value.trim();
     setEmail(email);
     if (!email) return;
   };
+  const { setContextEmail } = useEmail();
+  const [toast, setToast] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const showToast = (message: string, severity: "success" | "error") =>
+    setToast({ open: true, message, severity });
 
+  const handleToastClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason,
+  ) => {
+    if (reason === "clickaway") return;
+    setToast((t) => ({ ...t, open: false }))
+  }
   const handleEmailChecker = (email: string) => {
     setEmailValid(EMAIL_RE.test(email.trim()));
   };
@@ -53,8 +73,14 @@ export default function Home() {
     try {
       const registered = await checkEmail(email);
       setIsRegistered(registered);
-      if(!registered){
-        setEmailError('Email is not yet registered. Click create with this field as the email you will use')
+      if (!registered) {
+        setEmailError(
+          "Email is not yet registered. Click create with this field as the email you will use",
+        );
+      } else {
+        setEmailExists(true);
+        setContextEmail(email);
+        showToast("An active pin exists for your email", "success");
       }
     } catch {
     } finally {
@@ -100,7 +126,7 @@ export default function Home() {
           <Box
             sx={{
               display: "flex",
-              flexDirection:{md:"row", sm:"column", xs: "column"} ,
+              flexDirection: { md: "row", sm: "column", xs: "column" },
               gap: "5px",
             }}
           >
@@ -161,14 +187,14 @@ export default function Home() {
                       }
                       sx={{
                         mt: 1,
-                        minWidth: 240, 
+                        minWidth: 240,
                         borderRadius: "20px",
                         textTransform: "none",
                         backgroundColor: "black",
                         "&:hover": { backgroundColor: "#333" },
                         "&.Mui-disabled": {
                           backgroundColor: "#666",
-                          color: "rgba(255, 255, 255, 0.85)", 
+                          color: "rgba(255, 255, 255, 0.85)",
                         },
                       }}
                     >
@@ -209,7 +235,9 @@ export default function Home() {
             <Button
               variant="outlined"
               startIcon={<VerifiedUserIcon />}
-              onClick={() => router.push("/home/validate")}
+              onClick={() => {
+                router.push("/home/validate");
+              }}
               sx={{
                 borderRadius: "20px",
                 color: "black",
@@ -224,7 +252,10 @@ export default function Home() {
             <Button
               variant="contained"
               startIcon={<AddModeratorIcon />}
-              onClick={() => router.push("/home")}
+              onClick={() => {
+                setContextEmail(email);
+                router.push("/home");
+              }}
               sx={{
                 borderRadius: "20px",
                 backgroundColor: "black",
@@ -234,6 +265,20 @@ export default function Home() {
               Create PIN
             </Button>
           )}
+          <Snackbar
+            open={toast.open}
+            autoHideDuration={6000}
+            onClose={handleToastClose}
+          >
+            <Alert
+              onClose={handleToastClose}
+              severity={toast.severity}
+              variant="filled"
+              sx={{ width: "100%" }}
+            >
+              {toast.message}
+            </Alert>
+          </Snackbar>
         </Box>
       </main>
     </div>
