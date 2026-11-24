@@ -2,19 +2,22 @@ import { NextResponse } from "next/server";
 import { apiGet, apiPost } from "../database";
 
 export async function POST(req: Request) {
- let body: { pin_value?: unknown; active?: unknown };
+ let body: { pin_value?: unknown; active?: unknown; email: string };
  try {
   body = await req.json();
  } catch {
   return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
  }
 
- const { pin_value, active = true } = body;
+ const { pin_value, active = true, email } = body;
  if (typeof pin_value !== "string" || pin_value.length === 0) {
   return NextResponse.json({ error: "pin_value is required" }, { status: 400 });
  }
  if (typeof active !== "boolean") {
   return NextResponse.json({ error: "active must be true or false" }, { status: 400 });
+ }
+ if (typeof email !== "string" || email.length === 0) {
+  return NextResponse.json({ error: "email is required" }, { status: 400 });
  }
 
  try {
@@ -23,12 +26,12 @@ export async function POST(req: Request) {
   }
 
   await apiPost(
-      `INSERT INTO pins (pin_value, active) VALUES (?, ?)`,
-      [pin_value, active ? 1 : 0]
+      `INSERT INTO pins (pin_value, active, email) VALUES (?, ?, ?)`,
+      [pin_value, active ? 1 : 0, email]
   );
 
   return NextResponse.json(
-      { message: "Successfully created new pin" },
+      { message: `Successfully created new pin for email: ${email}` },
       { status: 201 }
   );
  } catch (err) {
