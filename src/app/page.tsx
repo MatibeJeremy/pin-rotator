@@ -1,6 +1,7 @@
 "use client";
 
 import styles from "./page.module.css";
+import { visuallyHidden } from "@mui/utils";
 import { TypeAnimation } from "react-type-animation";
 import {
   Box,
@@ -11,6 +12,7 @@ import {
   Typography,
   Stack,
   formLabelClasses,
+  CircularProgress,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
@@ -19,6 +21,7 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 import { useRouter } from "next/navigation";
 import checkEmail from "./utils/checkEmail";
 import { keyframes } from "@mui/system";
+import { Search } from "@mui/icons-material";
 
 const spin = keyframes`
   from { transform: rotate(0deg); }
@@ -31,6 +34,7 @@ export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState<string>("");
+  const [isRegistered, setIsRegistered] = useState<boolean>(false);
   const [emailValid, setEmailValid] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [emailExists, setEmailExits] = useState<boolean>(false);
@@ -40,20 +44,35 @@ export default function Home() {
     if (!email) return;
   };
 
+  const handleEmailChecker = (email: string) => {
+    setEmailValid(EMAIL_RE.test(email.trim()));
+  };
+
   const handleClick = async () => {
     setLoading(true);
     try {
       const registered = await checkEmail(email);
-      setEmailError(registered ? "This email is already registered" : null);
+      setIsRegistered(registered);
+      if(!registered){
+        setEmailError('Email is not yet registered. Click create with this field as the email you will use')
+      }
     } catch {
-      setEmailError(null);
     } finally {
       setLoading(false);
     }
   };
+  // The label changes with state, so users never have to guess what is happening
+  const label = loading ? "Checking…" : "Check registration status";
+
+  // The tooltip explains the button, including why it is disabled
+  const hint = loading
+    ? "Checking whether this email has a PIN"
+    : !emailValid
+      ? "Enter a valid email address to enable this"
+      : "Looks up whether a PIN already exists for this email";
 
   useEffect(() => {
-    setEmailValid(EMAIL_RE.test(email.trim()));
+    handleEmailChecker(email);
   }, [email]);
 
   return (
@@ -81,7 +100,7 @@ export default function Home() {
           <Box
             sx={{
               display: "flex",
-              flexDirection: "row",
+              flexDirection:{md:"row", sm:"column", xs: "column"} ,
               gap: "5px",
             }}
           >
@@ -124,36 +143,49 @@ export default function Home() {
               }}
             />
             {emailValid ? (
-              <Tooltip title="Submit your email">
-                <span>
-                  <IconButton
-                    aria-label="Rotate PIN"
-                    onClick={handleClick}
-                    disabled={loading || !emailValid}
-                    sx={{
-                      marginTop: "20%",
-                      backgroundColor: "black",
-                      color: "white",
-                      "&:hover": { backgroundColor: "#333" },
-                      "&.Mui-disabled": {
-                        backgroundColor: "#666",
-                        color: "white",
-                      },
-                    }}
-                  >
-                    <AutorenewIcon
+              <>
+                <Tooltip title={hint}>
+                  {/* The span lets the tooltip appear even when the button is disabled */}
+                  <span>
+                    <Button
+                      variant="contained"
+                      onClick={handleClick}
+                      disabled={loading || !emailValid}
+                      aria-busy={loading} // tells assistive tech the action is in progress
+                      startIcon={
+                        loading ? (
+                          <CircularProgress size={18} color="inherit" /> // spinner means "working"
+                        ) : (
+                          <Search />
+                        )
+                      }
                       sx={{
-                        animation: loading
-                          ? `${spin} 1s linear infinite`
-                          : "none",
-                        "@media (prefers-reduced-motion: reduce)": {
-                          animation: "none",
+                        mt: 1,
+                        minWidth: 240, 
+                        borderRadius: "20px",
+                        textTransform: "none",
+                        backgroundColor: "black",
+                        "&:hover": { backgroundColor: "#333" },
+                        "&.Mui-disabled": {
+                          backgroundColor: "#666",
+                          color: "rgba(255, 255, 255, 0.85)", 
                         },
                       }}
-                    />
-                  </IconButton>
-                </span>
-              </Tooltip>
+                    >
+                      {label}
+                    </Button>
+                  </span>
+                </Tooltip>
+
+                {/* Announced by screen readers when loading starts and ends, but invisible on screen */}
+                <Typography
+                  role="status"
+                  aria-live="polite"
+                  sx={visuallyHidden}
+                >
+                  {loading ? "Checking registration status" : ""}
+                </Typography>
+              </>
             ) : null}
           </Box>
           {emailValid ? null : (
@@ -167,7 +199,7 @@ export default function Home() {
                 textShadow: "0 1px 2px rgba(0, 0, 0, 0.35)",
               }}
             >
-              Enter a valid pin
+              Enter a valid email
             </Typography>
           )}
         </Stack>
@@ -187,7 +219,8 @@ export default function Home() {
             >
               Validate PIN
             </Button>
-          ) : (
+          ) : null}
+          {!isRegistered && emailValid && (
             <Button
               variant="contained"
               startIcon={<AddModeratorIcon />}
