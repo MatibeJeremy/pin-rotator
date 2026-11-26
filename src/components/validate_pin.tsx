@@ -93,9 +93,11 @@ export default function ValidateCard() {
           el && (el.value = "");
         });
       })
-      .catch((error: any) => {
-        console.error("Error validating pin:", error.message || error);
-        showToast(error.message || error, "error");
+      .catch((error: unknown) => {
+        const message =
+          error instanceof Error ? error.message : String(error ?? "");
+        console.error("Error validating pin:", message || error);
+        showToast(message || String(error ?? ""), "error");
         inputRefs.current.forEach((el) => {
           el && (el.value = "");
         });

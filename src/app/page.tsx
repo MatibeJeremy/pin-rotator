@@ -15,19 +15,14 @@ import {
   Alert,
   SnackbarCloseReason,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import { useRouter } from "next/navigation";
 import checkEmail from "./utils/checkEmail";
-import { keyframes } from "@mui/system";
 import { Search } from "@mui/icons-material";
 import { useEmail } from "@/app/providers/EmailContext";
 
-const spin = keyframes`
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-`;
 // const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/;
 
@@ -101,9 +96,14 @@ export default function Home() {
       ? "Enter a valid email address to enable this"
       : "Looks up whether a PIN already exists for this email";
 
-  useEffect(() => {
-    handleEmailChecker(email);
-  }, [email]);
+  // useEffect(() => {
+  //   handleEmailChecker(email);
+  // }, [email]);
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const nextEmail = e.target.value;
+    setEmail(nextEmail);
+    handleEmailChecker(nextEmail);
+  };
 
   return (
     <div className={styles.page}>
@@ -140,6 +140,7 @@ export default function Home() {
               onBlur={handleEmailBlur}
               onChange={(e) => {
                 setEmail(e.target.value);
+                handleEmailChange(e);
               }}
               sx={{
                 justifyItems: "center",
