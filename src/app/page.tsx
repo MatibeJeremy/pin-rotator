@@ -1,24 +1,28 @@
 "use client";
 
 import styles from "./page.module.css";
+import { visuallyHidden } from "@mui/utils";
 import { TypeAnimation } from "react-type-animation";
 import {
   Box,
-  IconButton,
   Button,
   TextField,
   Tooltip,
   Typography,
   Stack,
-  formLabelClasses,
+  CircularProgress,
+  Snackbar,
+  Alert,
+  SnackbarCloseReason,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
 import { useRouter } from "next/navigation";
 import checkEmail from "./utils/checkEmail";
 import { keyframes } from "@mui/system";
+import { Search } from "@mui/icons-material";
+import { useEmail } from "@/app/providers/EmailContext";
 
 const spin = keyframes`
   from { transform: rotate(0deg); }
@@ -31,29 +35,70 @@ export default function Home() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState<string>("");
+  const [isRegistered, setIsRegistered] = useState<boolean>(false);
   const [emailValid, setEmailValid] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [emailExists, setEmailExits] = useState<boolean>(false);
+  const [emailExists, setEmailExists] = useState<boolean>(false);
   const handleEmailBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
     const email = e.target.value.trim();
     setEmail(email);
     if (!email) return;
+  };
+  const { setContextEmail } = useEmail();
+  const [toast, setToast] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const showToast = (message: string, severity: "success" | "error") =>
+    setToast({ open: true, message, severity });
+
+  const handleToastClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason,
+  ) => {
+    if (reason === "clickaway") return;
+    setToast((t) => ({ ...t, open: false }))
+  }
+  const handleEmailChecker = (email: string) => {
+    setEmailValid(EMAIL_RE.test(email.trim()));
   };
 
   const handleClick = async () => {
     setLoading(true);
     try {
       const registered = await checkEmail(email);
-      setEmailError(registered ? "This email is already registered" : null);
+      setIsRegistered(registered);
+      if (!registered) {
+        setEmailError(
+          "Email is not yet registered. Click create with this field as the email you will use",
+        );
+      } else {
+        setEmailExists(true);
+        setContextEmail(email);
+        showToast("An active pin exists for your email", "success");
+      }
     } catch {
-      setEmailError(null);
     } finally {
       setLoading(false);
     }
   };
+  // The label changes with state, so users never have to guess what is happening
+  const label = loading ? "Checking…" : "Check registration status";
+
+  // The tooltip explains the button, including why it is disabled
+  const hint = loading
+    ? "Checking whether this email has a PIN"
+    : !emailValid
+      ? "Enter a valid email address to enable this"
+      : "Looks up whether a PIN already exists for this email";
 
   useEffect(() => {
-    setEmailValid(EMAIL_RE.test(email.trim()));
+    handleEmailChecker(email);
   }, [email]);
 
   return (
@@ -81,7 +126,7 @@ export default function Home() {
           <Box
             sx={{
               display: "flex",
-              flexDirection: "row",
+              flexDirection: { md: "row", sm: "column", xs: "column" },
               gap: "5px",
             }}
           >
@@ -124,36 +169,49 @@ export default function Home() {
               }}
             />
             {emailValid ? (
-              <Tooltip title="Submit your email">
-                <span>
-                  <IconButton
-                    aria-label="Rotate PIN"
-                    onClick={handleClick}
-                    disabled={loading || !emailValid}
-                    sx={{
-                      marginTop: "20%",
-                      backgroundColor: "black",
-                      color: "white",
-                      "&:hover": { backgroundColor: "#333" },
-                      "&.Mui-disabled": {
-                        backgroundColor: "#666",
-                        color: "white",
-                      },
-                    }}
-                  >
-                    <AutorenewIcon
+              <>
+                <Tooltip title={hint}>
+                  {/* The span lets the tooltip appear even when the button is disabled */}
+                  <span>
+                    <Button
+                      variant="contained"
+                      onClick={handleClick}
+                      disabled={loading || !emailValid}
+                      aria-busy={loading} // tells assistive tech the action is in progress
+                      startIcon={
+                        loading ? (
+                          <CircularProgress size={18} color="inherit" /> // spinner means "working"
+                        ) : (
+                          <Search />
+                        )
+                      }
                       sx={{
-                        animation: loading
-                          ? `${spin} 1s linear infinite`
-                          : "none",
-                        "@media (prefers-reduced-motion: reduce)": {
-                          animation: "none",
+                        mt: 1,
+                        minWidth: 240,
+                        borderRadius: "20px",
+                        textTransform: "none",
+                        backgroundColor: "black",
+                        "&:hover": { backgroundColor: "#333" },
+                        "&.Mui-disabled": {
+                          backgroundColor: "#666",
+                          color: "rgba(255, 255, 255, 0.85)",
                         },
                       }}
-                    />
-                  </IconButton>
-                </span>
-              </Tooltip>
+                    >
+                      {label}
+                    </Button>
+                  </span>
+                </Tooltip>
+
+                {/* Announced by screen readers when loading starts and ends, but invisible on screen */}
+                <Typography
+                  role="status"
+                  aria-live="polite"
+                  sx={visuallyHidden}
+                >
+                  {loading ? "Checking registration status" : ""}
+                </Typography>
+              </>
             ) : null}
           </Box>
           {emailValid ? null : (
@@ -167,7 +225,7 @@ export default function Home() {
                 textShadow: "0 1px 2px rgba(0, 0, 0, 0.35)",
               }}
             >
-              Enter a valid pin
+              Enter a valid email
             </Typography>
           )}
         </Stack>
@@ -177,7 +235,9 @@ export default function Home() {
             <Button
               variant="outlined"
               startIcon={<VerifiedUserIcon />}
-              onClick={() => router.push("/home/validate")}
+              onClick={() => {
+                router.push("/home/validate");
+              }}
               sx={{
                 borderRadius: "20px",
                 color: "black",
@@ -187,11 +247,15 @@ export default function Home() {
             >
               Validate PIN
             </Button>
-          ) : (
+          ) : null}
+          {!isRegistered && emailValid && (
             <Button
               variant="contained"
               startIcon={<AddModeratorIcon />}
-              onClick={() => router.push("/home")}
+              onClick={() => {
+                setContextEmail(email);
+                router.push("/home");
+              }}
               sx={{
                 borderRadius: "20px",
                 backgroundColor: "black",
@@ -201,6 +265,20 @@ export default function Home() {
               Create PIN
             </Button>
           )}
+          <Snackbar
+            open={toast.open}
+            autoHideDuration={6000}
+            onClose={handleToastClose}
+          >
+            <Alert
+              onClose={handleToastClose}
+              severity={toast.severity}
+              variant="filled"
+              sx={{ width: "100%" }}
+            >
+              {toast.message}
+            </Alert>
+          </Snackbar>
         </Box>
       </main>
     </div>

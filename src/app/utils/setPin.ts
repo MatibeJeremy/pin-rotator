@@ -1,8 +1,8 @@
-async function createPin(pinValue: string) {
+async function createPin(pinValue: string, email: string) {
     const res = await fetch("/api/pin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin_value: pinValue, active: true }),
+        body: JSON.stringify({ pin_value: pinValue,email: email, active: true }),
     });
 
     const data = await res.json().catch(() => ({}));

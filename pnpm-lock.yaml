@@ -23,6 +23,9 @@ dependencies:
   '@mui/system':
     specifier: ^9.6.0
     version: 9.6.0(@emotion/react@11.14.0)(@emotion/styled@11.14.1)(@types/react@19.0.0)(react@19.3.1)
+  '@mui/utils':
+    specifier: ^9.6.0
+    version: 9.6.0(@types/react@19.0.0)(react@19.3.1)
   next:
     specifier: 16.4.6
     version: 16.4.6(@babel/core@7.29.13)(@types/node@20.0.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1)(react@19.3.1)
