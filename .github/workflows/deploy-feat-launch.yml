@@ -41,7 +41,9 @@ jobs:
         run: pnpm lint
 
       - name: Run TypeScript check
-        run: pnpm exec tsc --noEmit
+        run: |
+          pnpm exec next typegen
+          pnpm exec tsc --noEmit
 
       - name: Verify Docker build
         uses: docker/build-push-action@v6
