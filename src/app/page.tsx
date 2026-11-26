@@ -37,7 +37,6 @@ export default function Home() {
   const [email, setEmail] = useState<string>("");
   const [isRegistered, setIsRegistered] = useState<boolean>(false);
   const [emailValid, setEmailValid] = useState<boolean>(false);
-  const [emailError, setEmailError] = useState<string | null>(null);
   const [emailExists, setEmailExists] = useState<boolean>(false);
   const handleEmailBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
     const email = e.target.value.trim();
@@ -62,8 +61,8 @@ export default function Home() {
     reason?: SnackbarCloseReason,
   ) => {
     if (reason === "clickaway") return;
-    setToast((t) => ({ ...t, open: false }))
-  }
+    setToast((t) => ({ ...t, open: false }));
+  };
   const handleEmailChecker = (email: string) => {
     setEmailValid(EMAIL_RE.test(email.trim()));
   };
@@ -74,13 +73,18 @@ export default function Home() {
       const registered = await checkEmail(email);
       setIsRegistered(registered);
       if (!registered) {
-        setEmailError(
-          "Email is not yet registered. Click create with this field as the email you will use",
+        showToast(
+          "Email is not yet registered. Click create with the email field populated with the email you will use.",
+          "error",
         );
+        setEmailExists(false);
       } else {
         setEmailExists(true);
         setContextEmail(email);
         showToast("An active pin exists for your email", "success");
+        setTimeout(() => {
+          setToast((t) => ({ ...t, open: false }));
+        }, 2000);
       }
     } catch {
     } finally {
@@ -137,8 +141,6 @@ export default function Home() {
               onChange={(e) => {
                 setEmail(e.target.value);
               }}
-              error={Boolean(emailError)}
-              helperText={emailError ?? " "}
               sx={{
                 justifyItems: "center",
                 "& .MuiOutlinedInput-root": {
