@@ -16,7 +16,7 @@ export const db = new sqlite3.Database(
 
 export const apiGet = async (query: string) => {
   return await new Promise((resolve, reject) => {
-    db.all(query, (err: Error, row: any) => {
+    db.all(query, (err: Error, row: unknown[]) => {
       if (err) {
         console.log(err);
         return reject(err);
